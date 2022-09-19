@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Topic Candidates - DiploMate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="bg-info">
+<nav class="nav nav-pills flex-column flex-sm-row fa-2x">
+    <a class="fa fa-home bg-white border border-3 border-primary rounded-pill flex-sm-fill text-sm-center nav-link"
+       data-toggle="tooltip" data-placement="bottom" title="Profile" href="#"
+       th:href="@{|/api/professor/${user.id}/profile|}"><!--Profile--></a>
+    <a class="fa fa-file rounded-pill flex-sm-fill text-sm-center nav-link active" aria-current="page" href="#"
+       data-toggle="tooltip" data-placement="bottom" title="Topic" th:href="@{|/api/professor/${user.id}/topics|}"><!--Topic--></a>
+    <a class="fa fa-calendar bg-white border border-3 border-primary rounded-pill flex-sm-fill text-sm-center nav-link"
+       data-toggle="tooltip" data-placement="bottom" title="Calendar" href="#"
+       th:href="@{|/api/professor/${user.id}/calendar|}"><!--Calendar--></a>
+    <a class="fa fa-sign-out bg-white border border-3 border-primary rounded-pill flex-sm-fill text-sm-center nav-link"
+       data-toggle="tooltip" data-placement="bottom" title="Logout" href="/api/logout"
+       onclick="return confirm('Are you sure you want to log out?');"><!--Logout--></a>
+</nav>
+<div class="container">
+    <div class="row mt-4">
+        <div class="col">
+            <div class="card bg-white rounded p-4 shadow">
+                <div class="card-body">
+                    <h2 class="text-center">Topic candidates</h2>
+                    <div th:if="${uninvitedStudents.empty} AND ${upcomingInterviews.empty}" class="mt-4 text-danger text-center fs-4">
+                        <span>There are no uninvited candidates or upcoming interviews scheduled for this topic yet</span>
+                    </div>
+                    <div th:unless="${uninvitedStudents.empty}">
+                        <h4 class="row mt-4">Uninvited candidates</h4>
+                        <div th:each="student : ${uninvitedStudents}">
+                            <div class="input-group mt-4 fs-4">
+                                <span th:text="${student.fullName}">Student fullName</span>
+                                <form th:action="@{|/api/professor/${user.id}/profile/info|}" method="get">
+                                    <input type="hidden" th:value="${student.id}" name="hostId"/>
+                                    <button type="submit" class="btn btn-link text-decoration-none">(Visit profile)</button>
+                                </form>
+                                <span class="mx-auto">&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/topics/accept-candidate|}" method="post">
+                                    <input type="hidden" th:value="${student.id}" name="studentId" />
+                                    <input type="hidden" th:value="${topic.id}" name="topicId" />
+                                    <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to accept this candidate?');">
+                                        Accept candidate</button>
+                                </form>
+                                <span>&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/calendar/interview-session|}" method="get">
+                                    <input type="hidden" th:value="${student.id}" name="studentId" />
+                                    <input type="hidden" th:value="${topic.id}" name="topicId" />
+                                    <button type="submit" class="btn btn-primary">Schedule interview</button>
+                                </form>
+                            </div>
+                            <hr class="mt-2 border-4 border-bottom border-primary">
+                        </div>
+                    </div>
+                    <div th:unless="${upcomingInterviews.empty}">
+                        <h4 class="row mt-4">Upcoming interviews</h4>
+                        <div th:each="interview : ${upcomingInterviews}">
+                            <div class="card card-body mt-4 fs-5">
+                                <div class="row">
+                                    <div class="col-2">
+                                        <h5 class="row">Date</h5>
+                                        <span th:text="${interview.date}" class="row">Interview date</span>
+                                        <h5 class="row mt-4">Time</h5>
+                                        <span th:text="${interview.time}" class="row">Interview time</span>
+                                    </div>
+                                    <div class="col-4">
+                                        <h5 class="row">Topic</h5>
+                                        <form th:action="@{|/api/professor/${user.id}/topics/details|}" method="get">
+                                            <input type="hidden" th:value="${interview.topic.id}" name="topicId"/>
+                                            <span th:text="${interview.topic.name}" class="row">Topic name</span>
+                                            <button type="submit" class="btn btn-link text-decoration-none">(View topic details)</button>
+                                        </form>
+                                        <h5 class="row mt-4">Student</h5>
+                                        <form th:action="@{|/api/professor/${user.id}/profile/info|}" method="get">
+                                            <input type="hidden" th:value="${interview.student.id}" name="hostId"/>
+                                            <span th:text="${interview.student.fullName}" class="row">Student fullName</span>
+                                            <button type="submit" class="btn btn-link text-decoration-none">(View profile)</button>
+                                        </form>
+                                    </div>
+                                    <div class="col-6 align-self-center">
+                                        <div class="input-group justify-content-end">
+                                            <form th:action="@{|/api/professor/${user.id}/topics/accept-candidate|}" method="post">
+                                                <input type="hidden" th:value="${interview.student.id}" name="studentId" />
+                                                <input type="hidden" th:value="${interview.topic.id}" name="topicId" />
+                                                <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to accept this candidate?');">
+                                                    Accept candidate</button>
+                                            </form>
+                                            <span>&nbsp;</span>
+                                            <form th:action="@{|/api/professor/${user.id}/calendar/update-session|}" method="get">
+                                                <input type="hidden" th:value="${interview.id}" name="sessionId"/>
+                                                <input type="hidden" th:value="${interview.topic.id}" name="sessionId"/>
+                                                <button type="submit" class="btn btn-primary rounded">Reschedule</button>
+                                            </form>
+                                            <span>&nbsp;</span>
+                                            <form th:action="@{|/api/professor/${user.id}/calendar/cancel-session|}" method="post">
+                                                <input type="hidden" th:value="${interview.id}" name="sessionId"/>
+                                                <button type="submit" onclick="return confirm('Are you sure you want to cancel this session (participants will be notified via email)?');"
+                                                        class="btn btn-danger rounded">Cancel</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="mt-2 border-4 border-bottom border-primary">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

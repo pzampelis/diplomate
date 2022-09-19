@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Topics - DiploMate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="bg-info">
+<nav class="nav nav-pills flex-column flex-sm-row fa-2x">
+    <a class="fa fa-home bg-white border border-3 border-primary rounded-pill flex-sm-fill text-sm-center nav-link"
+       data-toggle="tooltip" data-placement="bottom" title="Profile" href="#"
+       th:href="@{|/api/professor/${user.id}/profile|}"><!--Profile--></a>
+    <a class="fa fa-file rounded-pill flex-sm-fill text-sm-center nav-link active" aria-current="page" href="#"
+       data-toggle="tooltip" data-placement="bottom" title="Topic" th:href="@{|/api/professor/${user.id}/topics|}"><!--Topic--></a>
+    <a class="fa fa-calendar bg-white border border-3 border-primary rounded-pill flex-sm-fill text-sm-center nav-link"
+       data-toggle="tooltip" data-placement="bottom" title="Calendar" href="#"
+       th:href="@{|/api/professor/${user.id}/calendar|}"><!--Calendar--></a>
+    <a class="fa fa-sign-out bg-white border border-3 border-primary rounded-pill flex-sm-fill text-sm-center nav-link"
+       data-toggle="tooltip" data-placement="bottom" title="Logout" href="/api/logout"
+       onclick="return confirm('Are you sure you want to log out?');"><!--Logout--></a>
+</nav>
+<div class="container mt-4">
+    <div class="mt-4 text-center">
+        <a th:href="@{|/api/professor/${user.id}/topics/add-standard-topic|}" href="#" class="btn btn-primary btn-lg">Add new standard topic</a>
+        <a th:href="@{|/api/professor/${user.id}/topics/add-open-topic|}" href="#" class="btn btn-primary btn-lg">Add new open topic</a>
+        <a th:href="@{|/api/professor/${user.id}/topics/old|}" href="#" class="btn btn-primary btn-lg">See old topics</a>
+    </div>
+    <div class="row mt-4">
+        <div class="col">
+            <div class="card bg-white rounded p-4 shadow">
+                <div class="card-body">
+                    <h2 class="text-center">Uploaded topics</h2>
+                    <div th:if="${availableOpenTopics.empty} AND ${availableStandardTopics.empty} AND ${takenTopics.empty}"
+                         class="mt-4 text-danger text-center fs-4">
+                        <span>No topics uploaded yet</span>
+                    </div>
+                    <div th:unless="${availableStandardTopics.empty} AND ${availableOpenTopics.empty}" class="mt-4">
+                        <h4 class="row">Available topics</h4>
+                    </div>
+                    <div th:unless="${availableStandardTopics.empty}" class="mt-4">
+                        <h5 class="row">Standard topics</h5>
+                        <div th:each="topic : ${availableStandardTopics}" class="mt-2">
+                            <div class="input-group fs-4">
+                                <span th:text="${topic.name}">Topic name</span>
+                                <span class="mx-auto">&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/topics/details|}" method="get">
+                                    <input type="hidden" th:value="${topic.id}" name="topicId"/>
+                                    <button type="submit" class="btn btn-primary rounded">Details</button>
+                                </form>
+                                <span>&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/topics/update-topic|}" method="get">
+                                    <input type="hidden" th:value="${topic.id}" name="topicId"/>
+                                    <button type="submit" class="btn btn-primary rounded">Update</button>
+                                </form>
+                                <span>&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/topics/topic-candidates|}" method="get">
+                                    <input type="hidden" th:value="${topic.id}" name="topicId"/>
+                                    <button type="submit" class="btn btn-primary rounded">Candidates</button>
+                                </form>
+                                <span>&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/topics/topic-completed-interviews|}" method="get">
+                                    <input type="hidden" th:value="${topic.id}" name="topicId"/>
+                                    <button type="submit" class="btn btn-primary rounded">Completed interviews</button>
+                                </form>
+                                <span>&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/topics/delete-topic|}" method="post">
+                                    <input type="hidden" th:value="${topic.id}" name="topicId"/>
+                                    <button type="submit" class="btn btn-danger rounded"
+                                            onclick="return confirm('Are you sure you want to delete this topic?');">
+                                        Delete</button>
+                                </form>
+                            </div>
+                            <hr class="mt-2 border-4 border-bottom border-primary">
+                        </div>
+                    </div>
+                    <div th:unless="${availableOpenTopics.empty}" class="mt-4">
+                        <h5 class="row">Open topics</h5>
+                        <div th:each="topic : ${availableOpenTopics}" class="mt-2">
+                            <div class="input-group fs-4">
+                                <span th:text="${topic.name}">Topic name</span>
+                                <span class="mx-auto">&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/topics/details|}" method="get">
+                                    <input type="hidden" th:value="${topic.id}" name="topicId"/>
+                                    <button type="submit" class="btn btn-primary rounded">Details</button>
+                                </form>
+                                <span>&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/topics/update-topic|}" method="get">
+                                    <input type="hidden" th:value="${topic.id}" name="topicId"/>
+                                    <button type="submit" class="btn btn-primary rounded">Update</button>
+                                </form>
+                                <span>&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/topics/delete-topic|}" method="post">
+                                    <input type="hidden" th:value="${topic.id}" name="topicId"/>
+                                    <button type="submit" class="btn btn-danger rounded"
+                                            onclick="return confirm('Are you sure you want to delete this topic?');">
+                                        Delete</button>
+                                </form>
+                            </div>
+                            <hr class="mt-2 border-4 border-bottom border-primary">
+                        </div>
+                    </div>
+                    <div th:unless="${takenTopics.empty}" class="mt-4">
+                        <h4 class="row">Taken topics</h4>
+                        <div th:each="topic : ${takenTopics}" class="mt-2">
+                            <div class="input-group fs-4">
+                                <form th:action="@{|/api/professor/${user.id}/profile/info|}" method="get">
+                                    <span th:text="${topic.name} + ' - ' + ${topic.student.fullName}">
+                                        Topic name - Student fullName</span>
+                                    <input type="hidden" th:value="${topic.student.id}" name="hostId"/>
+                                    <button type="submit" class="btn btn-link text-decoration-none">
+                                        (View profile)</button>
+                                </form>
+                                <span class="mx-auto">&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/topics/details|}" method="get">
+                                    <input type="hidden" th:value="${topic.id}" name="topicId"/>
+                                    <button type="submit" class="btn btn-primary rounded">Details</button>
+                                </form>
+                                <span>&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/topic-repository|}" method="get">
+                                    <input type="hidden" th:value="${topic.id}" name="topicId"/>
+                                    <button type="submit" class="btn btn-primary rounded">Repository</button>
+                                </form>
+                                <span>&nbsp;</span>
+                                <form th:action="@{|/api/professor/${user.id}/topics/delete-topic|}" method="post">
+                                    <input type="hidden" th:value="${topic.id}" name="topicId"/>
+                                    <button type="submit" class="btn btn-danger rounded"
+                                            onclick="return confirm('This topic is assigned to a student, are you sure you want to delete it?');">
+                                        Delete</button>
+                                </form>
+                            </div>
+                            <hr class="mt-2 border-4 border-bottom border-primary">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
